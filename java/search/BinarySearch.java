@@ -25,12 +25,12 @@ public final class BinarySearch {
     }
 
     final int iterative = BinarySearchUtil.leftIterative(x, a);
-    final int recursive = BinarySearchUtil.leftRecursive(x, a, 0, a.length - 1);
+    final int recursive = BinarySearchUtil.leftRecursive(x, a, 0, a.length);
 
-    // if (iterative == recursive) {
-    System.out.println(iterative);
-    // } else {
-    //   throw new AssertionError("Results from iterative and recursive searches differ.");
-    // }
+    if (iterative == recursive) {
+      System.out.println(iterative);
+    } else {
+      throw new AssertionError("Results from iterative and recursive searches differ.");
+    }
   }
 }

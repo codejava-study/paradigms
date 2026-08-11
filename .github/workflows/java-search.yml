@@ -1,0 +1,9 @@
+name: Java Binary Search Test 
+on: push 
+
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - run: javac -d out $(find common java/search -name "*.java") && java -ea -cp out search.BinarySearchTest Base 3233 3435 3637 3839
