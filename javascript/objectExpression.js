@@ -20,6 +20,25 @@ Expression.prototype.toString = function () {
     this.operationSymbol
   );
 };
+Expression.prototype.prefix = function () {
+  return (
+    "(" +
+    this.operationSymbol +
+    " " +
+    this.elements.map((el) => el.prefix()).join(" ") +
+    ")"
+  );
+};
+Expression.prototype.postfix = function () {
+  return (
+    "(" +
+    this.elements.map((el) => el.postfix()).join(" ") +
+    " " +
+    this.operationSymbol +
+    ")"
+  );
+};
+
 Expression.prototype.diff = function (varName) {};
 
 // Base
@@ -122,6 +141,22 @@ function Floor(x) {
   };
 }
 Floor.prototype = Object.create(Expression.prototype);
+
+function ArcTan12(x, y) {
+  if (y !== undefined) {
+    Expression.call(this, x, y);
+  } else {
+    Expression.call(this, x);
+  }
+  this.op = function (...args) {
+    if (args.length === 2) {
+      return Math.atan2(args[0], args[1]);
+    }
+    return Math.atan(args[0]);
+  };
+  this.operationSymbol = "atan12";
+}
+ArcTan12.prototype = Object.create(Expression.prototype);
 
 // 3435
 function SoftWrap(x, min, max, lambda) {
@@ -245,6 +280,20 @@ function Cos(x) {
 }
 Cos.prototype = Object.create(Expression.prototype);
 
+function MeanExp(...args) {
+  Expression.call(this, ...args);
+  this.op = function (...args) {
+    if (args.length == 0) {
+      return 0;
+    }
+    return (
+      args.map((a) => Math.exp(a)).reduce((a, b) => a + b, 0) / args.length
+    );
+  };
+  this.operationSymbol = "meanExp";
+}
+MeanExp.prototype = Object.create(Expression.prototype);
+
 // 3637
 function Power(a, b) {
   Expression.call(this, a, b);
@@ -337,6 +386,27 @@ function Sum5(a, b, c, d, e) {
 }
 Sum5.prototype = Object.create(SumN.prototype);
 
+function SumExp(...args) {
+  Expression.call(this, ...args);
+  this.op = function (...args) {
+    return args.map((a) => Math.exp(a)).reduce((a, b) => a + b, 0);
+  };
+  this.operationSymbol = "sumExp";
+}
+SumExp.prototype = Object.create(Expression.prototype);
+
+function Lse(...args) {
+  Expression.call(this, ...args);
+  this.op = function (...args) {
+    if (args.length == 0) {
+      return 0;
+    }
+    return Math.log(args.map((a) => Math.exp(a)).reduce((a, b) => a + b, 0));
+  };
+  this.operationSymbol = "lse";
+}
+Lse.prototype = Object.create(Expression.prototype);
+
 // 3839
 function Gauss(a, b, c, x) {
   Expression.call(this, a, b, c, x);
@@ -404,6 +474,20 @@ function Avg5(a, b, c, d, e) {
 }
 Avg5.prototype = Object.create(AvgN.prototype);
 
+function Lme(...args) {
+  Expression.call(this, ...args);
+  this.op = function (...args) {
+    if (args.length == 0) {
+      return 0;
+    }
+    return Math.log(
+      args.map((a) => Math.exp(a)).reduce((a, b) => a + b, 0) / args.length,
+    );
+  };
+  this.operationSymbol = "lme";
+}
+Lme.prototype = Object.create(Expression.prototype);
+
 const operations = {
   // Base
   "+": { apply: Add, arity: { min: 2, max: 2 } },
@@ -415,6 +499,7 @@ const operations = {
   // 3233
   wrap: { apply: Wrap, arity: { min: 3, max: 3 } },
   floor: { apply: Floor, arity: { min: 1, max: 1 } },
+  atan12: { apply: ArcTan12, arity: { min: 1, max: 2 } },
 
   // 3435
   softWrap: { apply: SoftWrap, arity: { min: 4, max: 4 } },
@@ -424,6 +509,7 @@ const operations = {
   asin: { apply: ArcSin, arity: { min: 1, max: 1 } },
   sqrt: { apply: Sqrt, arity: { min: 1, max: 1 } },
   exp: { apply: Exp, arity: { min: 1, max: 1 } },
+  meanExp: { apply: MeanExp, arity: { min: 0, max: Infinity } },
 
   // 3637
   pow: { apply: Power, arity: { min: 2, max: 2 } },
@@ -433,6 +519,8 @@ const operations = {
   sum3: { apply: Sum3, arity: { min: 3, max: 3 } },
   sum4: { apply: Sum4, arity: { min: 4, max: 4 } },
   sum5: { apply: Sum5, arity: { min: 5, max: 5 } },
+  sumExp: { apply: SumExp, arity: { min: 0, max: Infinity } },
+  lse: { apply: Lse, arity: { min: 0, max: Infinity } },
 
   // 3839
   gauss: { apply: Gauss, arity: { min: 4, max: 4 } },
@@ -441,6 +529,7 @@ const operations = {
   avg3: { apply: Avg3, arity: { min: 3, max: 3 } },
   avg4: { apply: Avg4, arity: { min: 4, max: 4 } },
   avg5: { apply: Avg5, arity: { min: 5, max: 5 } },
+  lme: { apply: Lme, arity: { min: 0, max: Infinity } },
 };
 
 // === VARIABLES ===
@@ -450,6 +539,12 @@ function Variable(varName) {
     return vars[variables.indexOf(varName)];
   };
   this.toString = function () {
+    return varName;
+  };
+  this.prefix = function () {
+    return varName;
+  };
+  this.postfix = function () {
     return varName;
   };
   this.diff = function (diffVarName) {
@@ -467,6 +562,12 @@ function Const(c) {
     return c;
   };
   this.toString = function () {
+    return c.toString();
+  };
+  this.prefix = function () {
+    return c.toString();
+  };
+  this.postfix = function () {
     return c.toString();
   };
   this.diff = function (varName) {
@@ -497,4 +598,122 @@ let parse = (s) => {
   }
 
   return stack.pop();
+};
+
+const brackets = {
+  "(": ")",
+  "[": "]",
+  "{": "}",
+  "<": ">",
+  "«": "»",
+};
+
+let isBracket = (ch) =>
+  ch in brackets || new Set(Object.values(brackets)).has(ch);
+
+let opening = (closing) => {
+  for (const b in brackets) {
+    if (brackets[b] === closing) {
+      return b;
+    }
+  }
+};
+
+let tokenize = (s) => {
+  let tokens = [];
+  let current = "";
+
+  for (let i = 0; i < s.length; i++) {
+    let ch = s.charAt(i);
+
+    if (isBracket(ch)) {
+      tokens.push(current);
+      current = "";
+      tokens.push(ch);
+    } else if (ch === " " || ch === "\t" || ch === "\n") {
+      tokens.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+
+  tokens.push(current);
+
+  return tokens.filter((t) => t != "");
+};
+
+let parseTokens = (tokens, postfix) => {
+  let i = 0;
+
+  let parseNode = () => {
+    let token = tokens[i++];
+
+    if (token in brackets) {
+      let closing = brackets[token];
+      let opToken = tokens[i++];
+
+      if (!(opToken in operations)) {
+        throw new Error(`Unknown operation "${opToken}"`);
+      }
+      let operation = operations[opToken];
+
+      let args = [];
+      while (tokens[i] !== closing) {
+        if (i >= tokens.length) {
+          throw new Error(`Expected "${closing}"`);
+        }
+        args.push(parseNode());
+      }
+      i++;
+
+      if (
+        args.length < operation.arity.min ||
+        args.length > operation.arity.max
+      ) {
+        throw new Error(
+          `Wrong arity "${opToken}": expected ${operation.arity.min}-${operation.arity.max}, got ${args.length}`,
+        );
+      }
+
+      if (postfix) {
+        return new operation.apply(...args.reverse());
+      } else {
+        return new operation.apply(...args);
+      }
+    } else if (variables.includes(token)) {
+      return new Variable(token);
+    } else {
+      let num = Number(token);
+      if (isNaN(num)) {
+        throw new Error(`Invalid number literal: ${token}`);
+      }
+      return new Const(num);
+    }
+  };
+
+  let result = parseNode();
+  if (i !== tokens.length) {
+    throw new Error("No more tokens expected");
+  }
+  return result;
+};
+
+let parsePrefix = (s) => parseTokens(tokenize(s), false);
+let parsePostfix = (s) => {
+  let tokens = tokenize(s).reverse();
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (token in brackets) {
+      tokens[i] = brackets[token];
+      continue;
+    }
+
+    if (isBracket(token)) {
+      tokens[i] = opening(token);
+      continue;
+    }
+  }
+
+  return parseTokens(tokens, true);
 };
