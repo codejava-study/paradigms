@@ -12,7 +12,7 @@ public class BinarySearchUtil {
     int hi = a.length;
 
     while (lo < hi) {
-      int mid = lo + (hi - lo) / 2;
+      final int mid = lo + (hi - lo) / 2;
 
       if (x < a[mid]) {
         lo = mid + 1;
@@ -24,14 +24,71 @@ public class BinarySearchUtil {
     return lo;
   }
 
-  public static int leftRecursive(final int x, final int[] a, int lo, int hi) {
-    if (hi >= lo) return lo;
+  public static int rightIterative(final int x, final int[] a) {
+    int lo = 0;
+    int hi = a.length;
 
-    int mid = lo + (hi - lo) / 2;
-    if (x >= a[mid]) {
+    while (lo < hi) {
+      final int mid = lo + (hi - lo) / 2;
+
+      if (x <= a[mid]) {
+        lo = mid + 1;
+      } else {
+        hi = mid;
+      }
+    }
+
+    return lo;
+  }
+
+  public static int leftRecursive(final int x, final int[] a, final int lo, final int hi) {
+    if (lo >= hi) return lo;
+
+    final int mid = lo + (hi - lo) / 2;
+    if (x < a[mid]) {
       return leftRecursive(x, a, mid + 1, hi);
     } else {
       return leftRecursive(x, a, lo, mid);
     }
+  }
+
+  public static int rightRecursive(final int x, final int[] a, final int lo, final int hi) {
+    if (lo >= hi) return lo;
+
+    final int mid = lo + (hi - lo) / 2;
+    if (x <= a[mid]) {
+      return rightRecursive(x, a, mid + 1, hi);
+    } else {
+      return rightRecursive(x, a, lo, mid);
+    }
+  }
+
+  public static int leftRecursiveIncreasing(
+      final int x, final int[] a, final int lo, final int hi) {
+    if (lo >= hi) return lo;
+
+    final int mid = lo + (hi - lo) / 2;
+    if (x > a[mid]) {
+      return leftRecursiveIncreasing(x, a, mid + 1, hi);
+    } else {
+      return leftRecursiveIncreasing(x, a, lo, mid);
+    }
+  }
+
+  public static int leftIterativeIncreasing(final int x, final int[] a) {
+    int lo = 0;
+    int hi = a.length;
+
+    while (lo < hi) {
+      final int mid = lo + (hi - lo) / 2;
+
+      if (x > a[mid]) {
+        lo = mid + 1;
+      } else {
+        hi = mid;
+      }
+    }
+
+    return lo;
   }
 }
