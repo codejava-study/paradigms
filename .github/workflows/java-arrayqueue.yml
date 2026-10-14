@@ -1,0 +1,9 @@
+name: Java Array Queue Test
+on: push 
+
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - run: javac -d out $(find common java/queue -name "*.java") && java -ea --add-opens java.base/java.util=ALL-UNNAMED -cp out queue.QueueTest Base 3233 3435 3637
