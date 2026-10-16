@@ -194,4 +194,28 @@ public interface Queue {
    * @return true if <code>e</code> is in the queue, false otherwise.
    */
   boolean removeFirst(Object e);
+
+  /**
+   * Create queue of every <code>n</code>-th element starting from 1.
+   * 
+   * @param n - defines every what number to delete.
+   * @return new queue
+   */
+  Queue getNth(int n);
+
+  /**
+   * Create queue of every <code>n</code>-th element and delete them from the
+   * initial queue.
+   * 
+   * @param n - defines every what number to delete.
+   * @return new queue
+   */
+  Queue removeNth(int n);
+
+  /**
+   * Delete every <code>n</code>-th element from the initial queue.
+   *
+   * @param n - defines every what number to delete.
+   */
+  void dropNth(int n);
 }

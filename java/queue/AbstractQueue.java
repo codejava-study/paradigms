@@ -4,8 +4,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import javax.swing.text.StyledEditorKit.BoldAction;
-
 /**
  * AbstractQueue
  */
@@ -181,6 +179,41 @@ public abstract class AbstractQueue implements Queue {
       enqueue(dequeued);
     }
     return flag;
+  }
+
+  private Queue processNth(int n, boolean modifyOriginal, boolean createNewQueue) {
+    final int initialSize = size();
+    final Queue newQueue = (createNewQueue) ? init() : null;
+    for (int i = 1; i <= initialSize; i++) {
+      Object dequeued = dequeue();
+      if (i % n == 0) {
+        if (createNewQueue) {
+          newQueue.enqueue(dequeued);
+        }
+
+        if (modifyOriginal)
+          continue;
+      }
+      enqueue(dequeued);
+
+    }
+
+    return newQueue;
+  }
+
+  @Override
+  public void dropNth(int n) {
+    processNth(n, true, false);
+  }
+
+  @Override
+  public Queue getNth(int n) {
+    return processNth(n, false, true);
+  }
+
+  @Override
+  public Queue removeNth(int n) {
+    return processNth(n, true, true);
   }
 
 }
